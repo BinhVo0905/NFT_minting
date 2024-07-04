@@ -65,7 +65,7 @@ function init() {
             commonContentUrl: `ipfs://${metadataIpfsHash}/`,
         };
         const collection = new NftCollection_1.NftCollection(collectionData);
-        let seqno = yield (0, utils_1.sendTransferWithRetry)(wallet, () => collection.deploy(wallet));
+        let seqno = yield collection.deploy(wallet);
         console.log(`Collection deployed: ${collection.address}`);
         yield (0, delay_1.waitSeqno)(seqno, wallet);
         const files = yield (0, promises_1.readdir)(metadataFolderPath);
@@ -84,13 +84,12 @@ function init() {
                 commonContentUrl: file,
             };
             const nftItem = new NftItem_1.NftItem(collection);
-            seqno = yield (0, utils_1.sendTransferWithRetry)(wallet, () => nftItem.deploy(wallet, mintParams));
-            // seqno = await nftItem.deploy(wallet, mintParams);
+            seqno = yield nftItem.deploy(wallet, mintParams);
             console.log(`Successfully deployed ${index + 1} NFT`);
             yield (0, delay_1.waitSeqno)(seqno, wallet);
             index++;
         }
-        console.log("Start deploy of new marketplace ");
+        console.log("Start deploy of new marketplace  ");
         const marketplace = new NftMarketplace_1.NftMarketplace(wallet.contract.address);
         seqno = yield marketplace.deploy(wallet);
         yield (0, delay_1.waitSeqno)(seqno, wallet);
@@ -109,7 +108,6 @@ function init() {
             royaltyAmount: (0, ton_core_1.toNano)("0.5"),
         };
         const nftSaleContract = new NftSale_1.NftSale(saleData);
-        console.log(nftSaleContract);
         seqno = yield nftSaleContract.deploy(wallet);
         yield (0, delay_1.waitSeqno)(seqno, wallet);
         yield NftItem_1.NftItem.transfer(wallet, nftToSaleAddress, nftSaleContract.address);

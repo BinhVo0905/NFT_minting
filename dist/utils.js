@@ -11,7 +11,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.openWallet = openWallet;
 exports.encodeOffChainContent = encodeOffChainContent;
-exports.sendTransferWithRetry = sendTransferWithRetry;
 const ton_crypto_1 = require("ton-crypto");
 const ton_1 = require("ton");
 const toncenterBaseEndpoint = "https://testnet.toncenter.com";
@@ -64,34 +63,5 @@ function encodeOffChainContent(content) {
     const offChainPrefix = Buffer.from([0x01]);
     data = Buffer.concat([offChainPrefix, data]);
     return makeSnakeCell(data);
-}
-function sendTransferWithRetry(wallet_1, sendTransferFunction_1) {
-    return __awaiter(this, arguments, void 0, function* (wallet, sendTransferFunction, maxRetries = 5) {
-        let retryCount = 0;
-        const backoffFactor = 1000; // Initial delay of 1 second
-        while (retryCount < maxRetries) {
-            try {
-                const result = yield sendTransferFunction();
-                console.log("Transfer successful");
-                return result;
-            }
-            catch (error) {
-                if (error.message.includes("Ratelimit exceed")) {
-                    retryCount++;
-                    const sleepTime = backoffFactor * Math.pow(2, retryCount);
-                    console.log(`Rate limit exceeded. Retrying in ${sleepTime / 1000} seconds...`);
-                    yield delay(sleepTime);
-                }
-                else {
-                    console.error("Error during transfer:", error);
-                    throw error;
-                }
-            }
-        }
-        throw new Error("Max retries exceeded. Transfer failed.");
-    });
-}
-function delay(sleepTime) {
-    throw new Error("Function not implemented.");
 }
 //# sourceMappingURL=utils.js.map
